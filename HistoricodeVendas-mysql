@@ -1,0 +1,158 @@
+Link da atividade: https://docs.google.com/document/d/1C9hrIKCqe6Hb-SLyNnvVS7d_NMDn9mEntnMkyPPIUdY/edit?usp=sharing
+
+-- 1. Selecione todas as informações dos vendedores. 
+USE vendas;
+SELECT id_vendedor, id_cidade, nome_vendedor, comissão
+FROM vendedor;
+
+-- 2. Selecione todos os clientes com avaliação acima de 3 estrelas em ordem decrescente por avaliação. 
+SELECT nome_cliente, avaliacao
+FROM cliente
+WHERE avaliacao > 3
+ORDER BY avaliacao DESC;
+
+-- 3. Selecione em ordem alfabética o id_vendedor, nome_vendor e a comissão dos vendedores que possuam comissão acima de 20%. 
+SELECT id_vendedor, nome_vendedor, comissao
+FROM vendedor
+WHERE comissao > 0.20
+ORDER BY nome_vendedor ASC;
+
+-- 4. Selecione em ordem alfabética todos os clientes que residem em cidades que começam com a letra "S".
+SELECT nome_cliente, nome_cidade FROM cliente
+INNER JOIN cidade
+ON cliente.id_cidade = cidade.id_cidade
+WHERE nome_cidade LIKE 'S%'
+ORDER BY nome_cliente ASC;
+
+-- 5. Selecione em ordem alfabética todos os vendedores das cidades de “Belo Horizonte” e “Contagem”.
+SELECT nome_vendedor, nome_cidade FROM vendedor
+INNER JOIN cidade
+ON vendedor.id_cidade = cidade.id_cidade
+WHERE nome_cidade = 'Belo Horizonte' OR nome_cidade = 'Contagem'
+ORDER BY nome_vendedor ASC;
+
+-- 6. Selecione o id_vendedor e o nome_vendedor de todos os vendedores listados no Histórico de Vendas, sem repetições em ordem alfabética. 
+SELECT DISTINCT vendedor.id_vendedor, nome_vendedor FROM vendedor
+INNER JOIN historicovendas ON vendedor.id_vendedor =
+historicovendas.id_vendedor
+ORDER BY nome_vendedor ASC;
+
+-- 7. Selecione a data e o valor da venda de todos os pedidos do mês de agosto em ordem crescente.
+SELECT data_venda, valor_venda FROM historicovendas
+WHERE data_venda LIKE '_____08%'
+ORDER BY data_venda ASC;
+
+-- 8. Selecione em ordem alfabética o nome e avaliação de todos os clientes 5 estrelas da cidade de “Belo Horizonte”.
+SELECT nome_cliente, avaliacao, nome_cidade FROM cliente
+INNER JOIN cidade
+ON cidade.id_cidade = cliente.id_cidade
+WHERE nome_cidade = 'Belo Horizonte' AND avaliacao = 5
+ORDER BY nome_cliente ASC;
+
+-- 9. Escreva uma consulta que exiba o valor total de todas as vendas no histórico de vendas. 
+SELECT SUM(valor_venda)
+FROM historicovendas;
+
+-- 10. Qual é o valor médio do valor das vendas no histórico de vendas?
+SELECT AVG(valor_venda)
+FROM historicovendas;
+
+-- 11. Sem contar duplicadas, quantos vendedores estão listados no histórico de vendas? 
+SELECT COUNT(DISTINCT nome_vendedor) FROM historicovendas
+INNER JOIN vendedor
+ON vendedor.id_vendedor = historicovendas.id_vendedor;
+
+-- 12. Qual é a quantidade de vendas durante o mês de outubro? 
+SELECT COUNT(data_venda) FROM historicovendas
+WHERE data_venda LIKE '_____10%'
+ORDER by data_venda ASC;
+
+-- 13. Em ordem decrescente, qual a quantidade de vendas feita por cada vendedor? Sua consulta deverá exibir o nome de cada vendedor, bem como o total de vendas feitas por ele. 
+SELECT nome_vendedor, COUNT(id_cliente) FROM historicovendas
+INNER JOIN vendedor
+ON vendedor.id_vendedor = historicovendas.id_vendedor
+GROUP BY nome_vendedor
+ORDER BY COUNT(id_cliente) ASC;
+
+-- 14. Mostre em ordem decrescente por total, o nome da cidade de cada cidade e a quantidade de clientes que moram em cada uma delas. No resultado de sua consulta, cidades que ainda não têm clientes deverão ter valor zero no resultado das contagens.
+SELECT nome_cidade, COUNT(nome_cliente) FROM cliente
+INNER JOIN cidade
+ON cliente.id_cidade = cidade.id_cidade
+GROUP BY nome_cidade
+ORDER BY COUNT(nome_cliente) DESC;
+
+-- 15. Selecione o nome do vendedor, sua comissão, valor da venda e lucro (comissão * valor venda) de cada uma de suas vendas.
+SELECT nome_vendedor, comissao, valor_venda, (comissao*valor_venda)
+FROM vendedor
+INNER JOIN historicovendas
+ON historicovendas.id_vendedor = vendedor.id_vendedor;
+
+-- 16. Selecione o id e nome dos clientes que foram atendidos por vendedores com comissão igual a 25%? 
+SELECT DISTINCT cliente.id_cliente, nome_cliente FROM cliente
+INNER JOIN historicovendas ON historicovendas.id_cliente =
+cliente.id_cliente
+INNER JOIN vendedor ON vendedor.id_vendedor =
+historicovendas.id_vendedor
+WHERE comissao = 0.25;
+
+-- 17. Liste todos os vendedores que fizeram ou não alguma venda; sua consulta deverá retornar os seguintes dados: id_vendedor, nome_vendedor, comissao, data_venda, valor_venda e nome_cliente.
+SELECT vendedor.id_vendedor, nome_vendedor, comissao, data_venda,
+nome_cliente FROM vendedor
+LEFT JOIN historicovendas ON vendedor.id_vendedor =
+historicovendas.id_vendedor
+LEFT JOIN cliente ON historicovendas.id_cliente = cliente.id_cliente;
+
+-- 18. Selecione o nome e população de todas as cidades que não possuem clientes.
+SELECT nome_cidade, populacao FROM cidade
+LEFT JOIN cliente ON cidade.id_cidade = cliente.id_cidade
+WHERE cliente.id_cidade IS NULL;
+
+-- 19. Liste todos os clientes que fizeram ou não alguma compra; sua consulta deverá retornar os seguintes dados: id_cliente, nome_cliente, avaliacao, data_venda, valor_venda, nome_vendedor, ordenados de maneira crescente por data da venda e decrescente por valor da venda. 
+SELECT cliente.id_cliente, nome_cliente, avaliacao, data_venda,
+valor_venda, nome_vendedor FROM cliente 
+LEFT JOIN historicovendas ON historicovendas.id_cliente =
+cliente.id_cliente
+LEFT JOIN vendedor ON vendedor.id_vendedor =
+historicovendas.id_vendedor
+ORDER BY data_venda ASC, valor_venda DESC;
+
+-- 20. Qual é a cidade com maior população no banco de dados? 
+SELECT nome_cidade FROM cidade
+ORDER BY populacao DESC
+LIMIT 1;
+
+-- 21. Qual é a média de avaliação dos clientes? 
+SELECT AVG(avaliacao)
+FROM cliente;
+
+-- 22. Selecione o vendedor que realizou a venda mais cara no banco de dados. Sua consulta deverá retornar os seguintes dados: id_vendedor, nome_vendedor, comissao, data_venda, valor_venda e data_venda. 
+SELECT historicovendas.id_vendedor, nome_vendedor, comissao,
+data_venda, valor_venda FROM vendedor
+INNER JOIN historicovendas ON historicovendas.id_vendedor =
+vendedor.id_vendedor
+ORDER BY valor_venda DESC
+LIMIT 1;
+
+-- 23. Qual é o valor médio de vendas inferior à R$ 500,00 de cada vendedor durante o mês de outubro? Sua consulta deverá trazer os seguintes dados de cada vendedor, ordenados decrescente pela média: id_vendedor, nome_vendedor e média.
+SELECT vendedor.id_vendedor, nome_vendedor, AVG(valor_venda) FROM
+vendedor
+LEFT JOIN historicovendas ON vendedor.id_vendedor =
+historicovendas.id_vendedor
+WHERE data_venda LIKE '_____10%'
+HAVING AVG(valor_venda) < 500
+ORDER BY AVG(valor_venda) DESC;
+
+-- 24. Selecione o id do vendedor, nome do vendedor, nome da cidade que atende, data da venda, valor da venda, nome do cliente, avaliação e cidade que ele reside. 
+SELECT vendedor.id_vendedor, nome_vendedor, nome_cidade, data_venda,
+valor_venda, nome_cliente, avaliacao FROM vendedor
+LEFT JOIN historicovendas ON historicovendas.id_vendedor =
+vendedor.id_vendedor
+LEFT JOIN cliente ON cliente.id_cliente = historicovendas.id_cliente
+LEFT JOIN cidade ON vendedor.id_cidade = cidade.id_cidade;
+
+-- 25. Usando a junção cruzada (CROSS JOIN), gere um relatório de planejamento de visitas para os vendedores que irão atender os clientes que residem na mesma região de atuação deles. Sua consulta deverá exibir os seguintes dados: nome da cidade que o vendedor atua, nome do vendedor, nome do cliente,  avaliação do cliente;  ordenados de maneira crescente por nome da cidade, nome do vendedor, e, decrescente por avaliação do cliente. 
+SELECT nome_cidade, nome_vendedor, nome_cliente, avaliacao FROM
+vendedor
+INNER JOIN cidade ON vendedor.id_cidade = cidade.id_cidade
+CROSS JOIN cliente
+ORDER BY nome_cidade, nome_vendedor ASC, avaliacao DESC;
